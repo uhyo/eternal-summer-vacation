@@ -3,7 +3,7 @@ import { Temporal } from "@js-temporal/polyfill";
 
 const calendar = ethernalSummerVacationCalendar;
 
-describe("withCalendar", () => {
+describe("PlainDate withCalendar", () => {
   it("2021-01-01", () => {
     const date = Temporal.PlainDate.from("2021-01-01").withCalendar(calendar);
     expect(date.year).toBe(2021);
@@ -39,6 +39,54 @@ describe("withCalendar", () => {
     expect(date.year).toBe(2020);
     expect(date.month).toBe(2);
     expect(date.day).toBe(29);
+  });
+});
+
+describe("PlainYearMonth withCalendar", () => {
+  it("2021-01", () => {
+    const yearMonth = Temporal.PlainYearMonth.from({
+      year: 2021,
+      month: 1,
+      calendar,
+    });
+    expect(yearMonth.year).toBe(2021);
+    expect(yearMonth.month).toBe(1);
+  });
+  it("2021-08", () => {
+    const yearMonth = Temporal.PlainYearMonth.from({
+      year: 2021,
+      month: 8,
+      calendar,
+    });
+    expect(yearMonth.year).toBe(2021);
+    expect(yearMonth.month).toBe(8);
+  });
+  it("2021-11", () => {
+    const yearMonth = Temporal.PlainYearMonth.from({
+      year: 2021,
+      month: 11,
+      calendar,
+    });
+    expect(yearMonth.year).toBe(2021);
+    expect(yearMonth.month).toBe(11);
+  });
+  it("error: 2021-09", () => {
+    expect(() => {
+      Temporal.PlainYearMonth.from({
+        year: 2021,
+        month: 9,
+        calendar,
+      });
+    }).toThrow("Invalid Date");
+  });
+  it("error: 2021-10", () => {
+    expect(() => {
+      Temporal.PlainYearMonth.from({
+        year: 2021,
+        month: 10,
+        calendar,
+      });
+    }).toThrow("Invalid Date");
   });
 });
 
@@ -155,7 +203,7 @@ describe("dateFromFields", () => {
           monthCode: undefined,
           day: 6,
         },
-        { overflow: "constrain" }
+        { overflow: "reject" }
       )
     ).toThrowError("Invalid Date");
   });

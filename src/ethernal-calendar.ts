@@ -81,15 +81,19 @@ function dateFromFields(
     year: number | undefined;
     month: number | undefined;
     monthCode: string | undefined;
-    day: number;
+    day: number | undefined;
   },
   options: Temporal.AssignmentOptions
 ) {
-  const { year = 0, month = 1, monthCode, day = 1 } = fields;
-  if (month < 8) {
-    return Temporal.PlainDate.from({ year, month, day }, options);
+  const { year = 0, month = 1 } = fields;
+  if (month < 8 || month === 12) {
+    return Temporal.PlainDate.from(
+      { year, month, day: fields.day ?? 1 },
+      options
+    );
   }
   if (month === 8) {
+    const day = fields.day ?? 1;
     if ((day < 1 || 99 < day) && options.overflow === "reject") {
       throw new RangeError("Invalid Date");
     }
@@ -98,9 +102,17 @@ function dateFromFields(
       days: constrainedDay - 1,
     });
   }
-  const [m, d, isoDate] = ethernalDate({ year, month, day });
-  if (month !== m) {
+  // 08-99 in ethernal calendar corresponds to 11-07 in ISO calendar
+  if (month === 9 || month === 10) {
     throw new RangeError("Invalid Date");
   }
-  return isoDate;
+  if (month === 11) {
+    let day = fields.day ?? 7;
+    if ((day < 8 || 30 < day) && options.overflow === "reject") {
+      throw new RangeError("Invalid Date");
+    }
+    day = constrain(day, 8, 30);
+    return Temporal.PlainDate.from({ year, month, day }, options);
+  }
+  throw new RangeError("Invalid Date");
 }
