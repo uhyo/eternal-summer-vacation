@@ -98,7 +98,6 @@ describe("dateFromFields", () => {
           {
             year: 2021,
             month: 1,
-            monthCode: undefined,
             day: 1,
           },
           { overflow: "constrain" }
@@ -113,7 +112,6 @@ describe("dateFromFields", () => {
           {
             year: 2021,
             month: 8,
-            monthCode: undefined,
             day: 32,
           },
           { overflow: "constrain" }
@@ -128,7 +126,6 @@ describe("dateFromFields", () => {
           {
             year: 2021,
             month: 8,
-            monthCode: undefined,
             day: 99,
           },
           { overflow: "constrain" }
@@ -143,7 +140,6 @@ describe("dateFromFields", () => {
           {
             year: 2021,
             month: 11,
-            monthCode: undefined,
             day: 8,
           },
           { overflow: "constrain" }
@@ -158,7 +154,6 @@ describe("dateFromFields", () => {
           {
             year: 2021,
             month: 12,
-            monthCode: undefined,
             day: 31,
           },
           { overflow: "constrain" }
@@ -173,7 +168,6 @@ describe("dateFromFields", () => {
           {
             year: 2020,
             month: 2,
-            monthCode: undefined,
             day: 29,
           },
           { overflow: "constrain" }
@@ -187,7 +181,6 @@ describe("dateFromFields", () => {
         {
           year: 2021,
           month: 9,
-          monthCode: undefined,
           day: 1,
         },
         { overflow: "constrain" }
@@ -200,11 +193,136 @@ describe("dateFromFields", () => {
         {
           year: 2021,
           month: 11,
-          monthCode: undefined,
           day: 6,
         },
         { overflow: "reject" }
       )
     ).toThrowError("Invalid Date");
+  });
+});
+
+describe("arithmetic", () => {
+  describe("add", () => {
+    it("Next day of 2021-08-31 is 2021-08-32", () => {
+      const day = Temporal.PlainDate.from("2021-08-31").withCalendar(calendar);
+      const tomorrow = day.add({ days: 1 });
+      expect(tomorrow.month).toBe(8);
+      expect(tomorrow.day).toBe(32);
+    });
+    it("Next day of 2021-08-99 is 2021-11-08", () => {
+      const day = calendar.dateFromFields(
+        {
+          year: 2021,
+          month: 8,
+          day: 99,
+        },
+        { overflow: "reject" }
+      );
+      const tomorrow = day.add({ days: 1 });
+      expect(tomorrow.month).toBe(11);
+      expect(tomorrow.day).toBe(8);
+    });
+  });
+  it("until", () => {
+    const day1 = calendar.dateFromFields(
+      {
+        year: 2021,
+        month: 8,
+        day: 1,
+      },
+      { overflow: "reject" }
+    );
+    const day2 = calendar.dateFromFields(
+      {
+        year: 2021,
+        month: 8,
+        day: 60,
+      },
+      { overflow: "reject" }
+    );
+    expect(day1.until(day2).toJSON()).toBe("P59D");
+  });
+});
+
+describe("calendar properties", () => {
+  it("dayOfWeek", () => {
+    const day = calendar.dateFromFields(
+      {
+        year: 2021,
+        month: 8,
+        day: 60,
+      },
+      { overflow: "reject" }
+    );
+    expect(day.dayOfWeek).toBe(3);
+  });
+  it("dayOfYear", () => {
+    const day = calendar.dateFromFields(
+      {
+        year: 2021,
+        month: 8,
+        day: 60,
+      },
+      { overflow: "reject" }
+    );
+    expect(day.dayOfYear).toBe(272);
+  });
+  it("weekOfYear", () => {
+    const day = calendar.dateFromFields(
+      {
+        year: 2021,
+        month: 8,
+        day: 60,
+      },
+      { overflow: "reject" }
+    );
+    expect(day.weekOfYear).toBe(39);
+  });
+  it("daysInWeek", () => {
+    const day = calendar.dateFromFields(
+      {
+        year: 2021,
+        month: 8,
+        day: 60,
+      },
+      { overflow: "reject" }
+    );
+    expect(day.daysInWeek).toBe(7);
+  });
+  describe("daysInMonth", () => {
+    it("July", () => {
+      const july = calendar.dateFromFields(
+        {
+          year: 2021,
+          month: 7,
+          day: 1,
+        },
+        { overflow: "reject" }
+      );
+      expect(july.daysInMonth).toBe(31);
+    });
+    it("August", () => {
+      const august = calendar.dateFromFields(
+        {
+          year: 2021,
+          month: 8,
+          day: 1,
+        },
+        { overflow: "reject" }
+      );
+      console.log(august.calendar);
+      expect(august.daysInMonth).toBe(99);
+    });
+    it("November", () => {
+      const november = calendar.dateFromFields(
+        {
+          year: 2021,
+          month: 11,
+          day: 1,
+        },
+        { overflow: "constrain" }
+      );
+      expect(november.daysInMonth).toBe(23);
+    });
   });
 });
