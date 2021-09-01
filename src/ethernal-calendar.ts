@@ -7,7 +7,7 @@ export const ethernalSummerVacationCalendar =
       super("iso8601");
     }
     override month(date: DateLike) {
-      return ethernalDate(getPlainDateWithISOCalendar(date, 8))[0];
+      return ethernalDate(getPlainDateWithISOCalendar(date))[0];
     }
     override day(date: DateLike) {
       return ethernalDate(getPlainDateWithISOCalendar(date))[1];
@@ -63,13 +63,9 @@ export const ethernalSummerVacationCalendar =
       );
     }
     override daysInMonth(date: DateLike) {
-      const [m, , isoDate] = ethernalDate(getPlainDateWithISOCalendar(date, 8));
+      const [m, , isoDate] = ethernalDate(getPlainDateWithISOCalendar(date));
       if (m === 8) {
-        return 99;
-      }
-      if (m === 11) {
-        // 1-7 are absorbed by Augst
-        return 30 - 7;
+        return AugustDays;
       }
       return super.daysInMonth(isoDate);
     }
@@ -78,6 +74,8 @@ export const ethernalSummerVacationCalendar =
       return super.fields(fields);
     }
   })();
+
+const AugustDays = 31 + 30 + 31 + 30 + 31;
 
 type DateLike =
   | Temporal.PlainDate
@@ -95,22 +93,10 @@ function ethernalDate(
   const august1st = isoDate.with({ month: 8, day: 1 });
   const daysFromAugust1st =
     isoDate.since(august1st, { largestUnit: "day" }).days + 1;
-  if (daysFromAugust1st <= 99) {
-    return [8, daysFromAugust1st, isoDate];
-  } else {
-    return [isoDate.month, isoDate.day, isoDate];
-  }
+  return [8, daysFromAugust1st, isoDate];
 }
 
-function getPlainDateWithISOCalendar(date: DateLike, defaultDay?: number) {
-  if (date instanceof Temporal.PlainYearMonth) {
-    const fields = date.getISOFields();
-    return new Temporal.PlainDate(
-      fields.isoYear,
-      fields.isoMonth,
-      defaultDay ?? fields.isoDay
-    );
-  }
+function getPlainDateWithISOCalendar(date: DateLike) {
   if (isTemporalDateLike(date)) {
     const fields = date.getISOFields();
     return new Temporal.PlainDate(
@@ -153,10 +139,10 @@ function isoDateFromFields(
   let { year = 0, month = 1, day } = fields;
   if (month === 8) {
     day = fields.day ?? 1;
-    if ((day < 1 || 99 < day) && options.overflow === "reject") {
+    if ((day < 1 || AugustDays < day) && options.overflow === "reject") {
       throw new RangeError("Invalid Date");
     }
-    day = constrain(day, 1, 99);
+    day = constrain(day, 1, AugustDays);
     const august1st = new Temporal.PlainDate(year, 8, 1);
     const targetDate = august1st.add({ days: day - 1 });
     return {
@@ -165,16 +151,8 @@ function isoDateFromFields(
       day: targetDate.day,
     };
   }
-  // 08-99 in ethernal calendar corresponds to 11-07 in ISO calendar
-  if (month === 9 || month === 10) {
+  if (month > 8) {
     throw new RangeError("Invalid Date");
-  }
-  if (month === 11) {
-    day = fields.day ?? 8;
-    if ((day < 8 || 30 < day) && options.overflow === "reject") {
-      throw new RangeError("Invalid Date");
-    }
-    day = constrain(day, 8, 30);
   }
   return {
     year,

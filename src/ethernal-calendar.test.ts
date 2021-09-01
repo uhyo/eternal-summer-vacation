@@ -25,14 +25,14 @@ describe("PlainDate withCalendar", () => {
   it("2021-11-08", () => {
     const date = Temporal.PlainDate.from("2021-11-08").withCalendar(calendar);
     expect(date.year).toBe(2021);
-    expect(date.month).toBe(11);
-    expect(date.day).toBe(8);
+    expect(date.month).toBe(8);
+    expect(date.day).toBe(100);
   });
   it("2021-12-31", () => {
     const date = Temporal.PlainDate.from("2021-12-31").withCalendar(calendar);
     expect(date.year).toBe(2021);
-    expect(date.month).toBe(12);
-    expect(date.day).toBe(31);
+    expect(date.month).toBe(8);
+    expect(date.day).toBe(153);
   });
   it("2020-02-29", () => {
     const date = Temporal.PlainDate.from("2020-02-29").withCalendar(calendar);
@@ -61,15 +61,6 @@ describe("PlainYearMonth withCalendar", () => {
     expect(yearMonth.year).toBe(2021);
     expect(yearMonth.month).toBe(8);
   });
-  it("2021-11", () => {
-    const yearMonth = Temporal.PlainYearMonth.from({
-      year: 2021,
-      month: 11,
-      calendar,
-    });
-    expect(yearMonth.year).toBe(2021);
-    expect(yearMonth.month).toBe(11);
-  });
   it("error: 2021-09", () => {
     expect(() => {
       Temporal.PlainYearMonth.from({
@@ -84,6 +75,24 @@ describe("PlainYearMonth withCalendar", () => {
       Temporal.PlainYearMonth.from({
         year: 2021,
         month: 10,
+        calendar,
+      });
+    }).toThrow("Invalid Date");
+  });
+  it("error: 2021-11", () => {
+    expect(() => {
+      Temporal.PlainYearMonth.from({
+        year: 2021,
+        month: 11,
+        calendar,
+      });
+    }).toThrow("Invalid Date");
+  });
+  it("error: 2021-12", () => {
+    expect(() => {
+      Temporal.PlainYearMonth.from({
+        year: 2021,
+        month: 12,
         calendar,
       });
     }).toThrow("Invalid Date");
@@ -133,28 +142,28 @@ describe("dateFromFields", () => {
         .toJSON()
     ).toEqual("2021-11-07");
   });
-  it("2021-11-08", () => {
+  it("2021-08-100", () => {
     expect(
       calendar
         .dateFromFields(
           {
             year: 2021,
-            month: 11,
-            day: 8,
+            month: 8,
+            day: 100,
           },
           { overflow: "constrain" }
         )
         .toJSON()
     ).toEqual("2021-11-08");
   });
-  it("2021-12-31", () => {
+  it("2021-08-153", () => {
     expect(
       calendar
         .dateFromFields(
           {
             year: 2021,
-            month: 12,
-            day: 31,
+            month: 8,
+            day: 153,
           },
           { overflow: "constrain" }
         )
@@ -199,6 +208,18 @@ describe("dateFromFields", () => {
       )
     ).toThrowError("Invalid Date");
   });
+  it("error: 2021-08-154", () => {
+    expect(() =>
+      calendar.dateFromFields(
+        {
+          year: 2021,
+          month: 8,
+          day: 154,
+        },
+        { overflow: "reject" }
+      )
+    ).toThrowError("Invalid Date");
+  });
 });
 
 describe("arithmetic", () => {
@@ -209,7 +230,7 @@ describe("arithmetic", () => {
       expect(tomorrow.month).toBe(8);
       expect(tomorrow.day).toBe(32);
     });
-    it("Next day of 2021-08-99 is 2021-11-08", () => {
+    it("Next day of 2021-08-99 is 2021-08-100", () => {
       const day = calendar.dateFromFields(
         {
           year: 2021,
@@ -219,8 +240,22 @@ describe("arithmetic", () => {
         { overflow: "reject" }
       );
       const tomorrow = day.add({ days: 1 });
-      expect(tomorrow.month).toBe(11);
-      expect(tomorrow.day).toBe(8);
+      expect(tomorrow.month).toBe(8);
+      expect(tomorrow.day).toBe(100);
+    });
+    it("Next day of 2021-08-153 is 2022-01-01", () => {
+      const day = calendar.dateFromFields(
+        {
+          year: 2021,
+          month: 8,
+          day: 153,
+        },
+        { overflow: "reject" }
+      );
+      const tomorrow = day.add({ days: 1 });
+      expect(tomorrow.year).toBe(2022);
+      expect(tomorrow.month).toBe(1);
+      expect(tomorrow.day).toBe(1);
     });
   });
   it("until", () => {
@@ -311,18 +346,7 @@ describe("calendar properties", () => {
         { overflow: "reject" }
       );
       console.log(august.calendar);
-      expect(august.daysInMonth).toBe(99);
-    });
-    it("November", () => {
-      const november = calendar.dateFromFields(
-        {
-          year: 2021,
-          month: 11,
-          day: 1,
-        },
-        { overflow: "constrain" }
-      );
-      expect(november.daysInMonth).toBe(23);
+      expect(august.daysInMonth).toBe(153);
     });
   });
 });
