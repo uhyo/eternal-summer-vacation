@@ -1,10 +1,10 @@
 import { Temporal } from "@js-temporal/polyfill";
-import { ethernalSummerVacationCalendar } from "./ethernal-calendar";
+import { eternalSummerVacationCalendar } from "./eternal-calendar";
 
 it("Days in 2021", () => {
   let result = "";
   let today = Temporal.PlainDate.from("2021-01-01").withCalendar(
-    ethernalSummerVacationCalendar
+    eternalSummerVacationCalendar
   );
   while (today.year === 2021) {
     result += `${today.year}年${today.month}月${today.day}日\n`;

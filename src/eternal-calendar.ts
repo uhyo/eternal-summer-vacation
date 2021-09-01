@@ -1,21 +1,19 @@
 import { Temporal } from "@js-temporal/polyfill";
-const calendarId = "ethernal-summer-vacation";
-export const ethernalSummerVacationCalendar =
-  new (class extends Temporal.Calendar {
+const calendarId = "eternal-summer-vacation";
+export const eternalSummerVacationCalendar =
+  new (class EternalSummerVacationCalendar extends Temporal.Calendar {
     override id: string = calendarId;
     constructor() {
       super("iso8601");
     }
     override month(date: DateLike) {
-      return ethernalDate(getPlainDateWithISOCalendar(date))[0];
+      return eternalDate(getPlainDateWithISOCalendar(date))[0];
     }
     override day(date: DateLike) {
-      return ethernalDate(getPlainDateWithISOCalendar(date))[1];
+      return eternalDate(getPlainDateWithISOCalendar(date))[1];
     }
     override monthCode(date: DateLike) {
-      const [month, , isoDate] = ethernalDate(
-        getPlainDateWithISOCalendar(date)
-      );
+      const [month, , isoDate] = eternalDate(getPlainDateWithISOCalendar(date));
       return Temporal.PlainYearMonth.from({ year: isoDate.year, month })
         .monthCode;
     }
@@ -28,7 +26,7 @@ export const ethernalSummerVacationCalendar =
         year,
         month,
         day,
-        ethernalSummerVacationCalendar
+        eternalSummerVacationCalendar
       );
     }
     override yearMonthFromFields(
@@ -45,7 +43,7 @@ export const ethernalSummerVacationCalendar =
       return new Temporal.PlainYearMonth(
         year,
         month,
-        ethernalSummerVacationCalendar
+        eternalSummerVacationCalendar
       );
     }
     override monthDayFromFields(
@@ -59,15 +57,106 @@ export const ethernalSummerVacationCalendar =
       return new Temporal.PlainMonthDay(
         month,
         day,
-        ethernalSummerVacationCalendar
+        eternalSummerVacationCalendar
       );
     }
     override daysInMonth(date: DateLike) {
-      const [m, , isoDate] = ethernalDate(getPlainDateWithISOCalendar(date));
+      const [m, , isoDate] = eternalDate(getPlainDateWithISOCalendar(date));
       if (m === 8) {
         return AugustDays;
       }
       return super.daysInMonth(isoDate);
+    }
+
+    override dateAdd(
+      dateLike: string | Temporal.PlainDate | Temporal.DateLike,
+      durationLike: string | Temporal.Duration | Temporal.DurationLike,
+      options: Temporal.ArithmeticOptions
+    ): Temporal.PlainDate {
+      const date = getPlainDateWithISOCalendar(dateLike).withCalendar(
+        eternalSummerVacationCalendar
+      );
+      const duration = Temporal.Duration.from(durationLike);
+
+      let newYear = date.year + duration.years;
+      let newMonth = date.month + duration.months;
+      // -15 -- -8 -> -2
+      //  -7 --  0 -> -1
+      //   1 --  8 -> 0
+      //   9 -- 15 -> +1
+      //  16 -- 23 -> +2 ...
+      const diffy = Math.floor((newMonth - 1) / 8);
+      newYear += diffy;
+      newMonth -= diffy * 8;
+
+      let newDay = date.day;
+      if (duration.months) {
+        // if months changed, we need to check if the day is still valid
+        const yearMonth = eternalSummerVacationCalendar.yearMonthFromFields(
+          {
+            year: newYear,
+            month: newMonth,
+          },
+          { overflow: "reject" }
+        );
+        if (options.overflow === "reject") {
+          if (date.day > yearMonth.daysInMonth) {
+            throw new RangeError(
+              `${date.day} is not a valid day for ${yearMonth.monthCode}`
+            );
+          }
+        } else {
+          if (newDay > yearMonth.daysInMonth) {
+            newDay = yearMonth.daysInMonth;
+          }
+        }
+      }
+
+      newDay += duration.days;
+      // TODO: this loop may be heavy
+      do {
+        if (newDay < 1) {
+          newMonth--;
+          if (newMonth < 1) {
+            newYear--;
+            newMonth = 8;
+          }
+          const prevYearMonth =
+            eternalSummerVacationCalendar.yearMonthFromFields(
+              {
+                year: newYear,
+                month: newMonth,
+              },
+              { overflow: "reject" }
+            );
+          newDay = prevYearMonth.daysInMonth + newDay;
+          continue;
+        }
+        const yearMonth = eternalSummerVacationCalendar.yearMonthFromFields(
+          {
+            year: newYear,
+            month: newMonth,
+          },
+          { overflow: "reject" }
+        );
+        if (newDay > yearMonth.daysInMonth) {
+          newDay -= yearMonth.daysInMonth;
+          newMonth++;
+          if (newMonth > 8) {
+            newYear++;
+            newMonth = 1;
+          }
+          continue;
+        }
+        break;
+      } while (true);
+
+      return Temporal.PlainDate.from({
+        year: newYear,
+        month: newMonth,
+        day: newDay,
+        calendar: eternalSummerVacationCalendar,
+      });
     }
 
     override fields(fields: Iterable<string>) {
@@ -84,7 +173,7 @@ type DateLike =
   | Temporal.DateLike
   | string;
 
-function ethernalDate(
+function eternalDate(
   isoDate: Temporal.PlainDate
 ): [month: number, day: number, isoDate: Temporal.PlainDate] {
   if (isoDate.month < 8) {
@@ -122,7 +211,7 @@ function constrain(num: number, min: number, max: number) {
 }
 
 /**
- * Converts an ethernal date to ISO date.
+ * Converts an eternal date to ISO date.
  */
 function isoDateFromFields(
   fields: {

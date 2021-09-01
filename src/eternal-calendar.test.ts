@@ -1,7 +1,7 @@
-import { ethernalSummerVacationCalendar } from "./ethernal-calendar";
+import { eternalSummerVacationCalendar } from "./eternal-calendar";
 import { Temporal } from "@js-temporal/polyfill";
 
-const calendar = ethernalSummerVacationCalendar;
+const calendar = eternalSummerVacationCalendar;
 
 describe("PlainDate withCalendar", () => {
   it("2021-01-01", () => {
@@ -223,7 +223,7 @@ describe("dateFromFields", () => {
 });
 
 describe("arithmetic", () => {
-  describe("add", () => {
+  describe("add: days", () => {
     it("Next day of 2021-08-31 is 2021-08-32", () => {
       const day = Temporal.PlainDate.from("2021-08-31").withCalendar(calendar);
       const tomorrow = day.add({ days: 1 });
@@ -256,6 +256,60 @@ describe("arithmetic", () => {
       expect(tomorrow.year).toBe(2022);
       expect(tomorrow.month).toBe(1);
       expect(tomorrow.day).toBe(1);
+    });
+  });
+  describe("add: months", () => {
+    it("2021-01 + 1 month", () => {
+      const month = new Temporal.PlainYearMonth(2021, 1, calendar);
+      const result = month.add({ months: 1 });
+      expect(result.year).toBe(2021);
+      expect(result.month).toBe(2);
+    });
+    it("2021-07 + 1 month", () => {
+      const month = new Temporal.PlainYearMonth(2021, 7, calendar);
+      const result = month.add({ months: 1 });
+      expect(result.year).toBe(2021);
+      expect(result.month).toBe(8);
+    });
+    it("2021-08 + 1 month", () => {
+      const month = new Temporal.PlainYearMonth(2021, 8, calendar);
+      const result = month.add({ months: 1 });
+      expect(result.year).toBe(2022);
+      expect(result.month).toBe(1);
+    });
+    it("2021-01 - 1 month", () => {
+      const month = new Temporal.PlainYearMonth(2021, 1, calendar);
+      const result = month.subtract({ months: 1 });
+      expect(result.year).toBe(2020);
+      expect(result.month).toBe(8);
+    });
+    it("2021-03-05 + 5 month", () => {
+      const month = new Temporal.PlainDate(2021, 3, 5, calendar);
+      const result = month.add({ months: 5 });
+      expect(result.year).toBe(2021);
+      expect(result.month).toBe(8);
+      expect(result.day).toBe(5);
+    });
+    it("2021-03-05 + 15 month", () => {
+      const month = new Temporal.PlainDate(2021, 3, 5, calendar);
+      const result = month.add({ months: 15 });
+      expect(result.year).toBe(2023);
+      expect(result.month).toBe(2);
+      expect(result.day).toBe(5);
+    });
+    it("2021-08-99 + 1 month", () => {
+      const month = calendar.dateFromFields(
+        {
+          year: 2021,
+          month: 8,
+          day: 99,
+        },
+        { overflow: "reject" }
+      );
+      const result = month.add({ months: 1 });
+      expect(result.year).toBe(2022);
+      expect(result.month).toBe(1);
+      expect(result.day).toBe(31);
     });
   });
   it("until", () => {
