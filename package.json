@@ -13,6 +13,10 @@
   ],
   "author": "uhyo <uhyo@uhy.ooo>",
   "license": "MIT",
+  "files": [
+    "src",
+    "dist"
+  ],
   "dependencies": {
     "@js-temporal/polyfill": "^0.2.0"
   },
