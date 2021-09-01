@@ -112,7 +112,7 @@ describe("dateFromFields", () => {
           { overflow: "constrain" }
         )
         .toJSON()
-    ).toEqual("2021-01-01");
+    ).toEqual("2021-01-01[u-ca=eternal-summer-vacation]");
   });
   it("2021-08-32", () => {
     expect(
@@ -126,7 +126,7 @@ describe("dateFromFields", () => {
           { overflow: "constrain" }
         )
         .toJSON()
-    ).toEqual("2021-09-01");
+    ).toEqual("2021-09-01[u-ca=eternal-summer-vacation]");
   });
   it("2021-08-99", () => {
     expect(
@@ -140,7 +140,7 @@ describe("dateFromFields", () => {
           { overflow: "constrain" }
         )
         .toJSON()
-    ).toEqual("2021-11-07");
+    ).toEqual("2021-11-07[u-ca=eternal-summer-vacation]");
   });
   it("2021-08-100", () => {
     expect(
@@ -154,7 +154,7 @@ describe("dateFromFields", () => {
           { overflow: "constrain" }
         )
         .toJSON()
-    ).toEqual("2021-11-08");
+    ).toEqual("2021-11-08[u-ca=eternal-summer-vacation]");
   });
   it("2021-08-153", () => {
     expect(
@@ -168,7 +168,7 @@ describe("dateFromFields", () => {
           { overflow: "constrain" }
         )
         .toJSON()
-    ).toEqual("2021-12-31");
+    ).toEqual("2021-12-31[u-ca=eternal-summer-vacation]");
   });
   it("2020-02-29", () => {
     expect(
@@ -182,7 +182,7 @@ describe("dateFromFields", () => {
           { overflow: "constrain" }
         )
         .toJSON()
-    ).toEqual("2020-02-29");
+    ).toEqual("2020-02-29[u-ca=eternal-summer-vacation]");
   });
   it("error: 2021-09-01", () => {
     expect(() =>

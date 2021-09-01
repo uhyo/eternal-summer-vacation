@@ -2,9 +2,11 @@ import { Temporal } from "@js-temporal/polyfill";
 const calendarId = "eternal-summer-vacation";
 export const eternalSummerVacationCalendar =
   new (class EternalSummerVacationCalendar extends Temporal.Calendar {
-    override id: string = calendarId;
     constructor() {
       super("iso8601");
+    }
+    override toString() {
+      return calendarId;
     }
     override month(date: DateLike) {
       return eternalDate(getPlainDateWithISOCalendar(date))[0];
