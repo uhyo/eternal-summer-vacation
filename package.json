@@ -1,7 +1,7 @@
 {
   "name": "eternal-summer-vacation",
   "version": "2.0.0",
-  "description": "",
+  "description": "Temporal Calendar for ethernal summer vacation",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
@@ -13,6 +13,7 @@
   ],
   "author": "uhyo <uhyo@uhy.ooo>",
   "license": "MIT",
+  "repository": "github:uhyo/eternal-summer-vacation",
   "files": [
     "src",
     "dist"
