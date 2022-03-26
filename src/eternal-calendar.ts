@@ -32,16 +32,10 @@ export const eternalSummerVacationCalendar =
       );
     }
     override yearMonthFromFields(
-      fields: {
-        year: number | undefined;
-        month: number | undefined;
-      },
+      fields: Temporal.YearOrEraAndEraYear & Temporal.MonthOrMonthCode,
       options: Temporal.AssignmentOptions
     ): Temporal.PlainYearMonth {
-      const { year, month } = isoDateFromFields(
-        { ...fields, day: undefined },
-        options
-      );
+      const { year, month } = isoDateFromFields({ ...fields, day: 1 }, options);
       return new Temporal.PlainYearMonth(
         year,
         month,
@@ -49,8 +43,7 @@ export const eternalSummerVacationCalendar =
       );
     }
     override monthDayFromFields(
-      fields: {
-        month: number | undefined;
+      fields: Temporal.MonthOrMonthCode & {
         day: number;
       },
       options: Temporal.AssignmentOptions
@@ -71,7 +64,7 @@ export const eternalSummerVacationCalendar =
     }
 
     override dateAdd(
-      dateLike: string | Temporal.PlainDate | Temporal.DateLike,
+      dateLike: string | Temporal.PlainDate | Temporal.PlainDateLike,
       durationLike: string | Temporal.Duration | Temporal.DurationLike,
       options: Temporal.ArithmeticOptions
     ): Temporal.PlainDate {
@@ -172,7 +165,7 @@ type DateLike =
   | Temporal.PlainDate
   | Temporal.PlainDateTime
   | Temporal.PlainYearMonth
-  | Temporal.DateLike
+  | Temporal.PlainDateLike
   | string;
 
 function eternalDate(
@@ -216,20 +209,20 @@ function constrain(num: number, min: number, max: number) {
  * Converts an eternal date to ISO date.
  */
 function isoDateFromFields(
-  fields: {
-    year: number | undefined;
-    month: number | undefined;
-    day: number | undefined;
-  },
+  fields: Temporal.YearOrEraAndEraYear &
+    Temporal.MonthOrMonthCode & { day: number },
   options: Temporal.AssignmentOptions
 ): {
   year: number;
   month: number;
   day: number;
 } {
-  let { year = 0, month = 1, day } = fields;
+  const month = hasNumberProperty(fields, "month")
+    ? fields.month
+    : monthCodeToMonth(fields.monthCode);
+  const year = hasNumberProperty(fields, "year") ? fields.year : fields.eraYear;
+  let day = fields.day;
   if (month === 8) {
-    day = fields.day ?? 1;
     if ((day < 1 || AugustDays < day) && options.overflow === "reject") {
       throw new RangeError("Invalid Date");
     }
@@ -263,4 +256,22 @@ function isTemporalDateLike(
     date instanceof Temporal.PlainYearMonth ||
     date instanceof Temporal.PlainMonthDay
   );
+}
+
+function isPropertyAccessible(obj: unknown): obj is Record<string, unknown> {
+  return obj !== null && obj !== undefined;
+}
+
+function hasNumberProperty<K extends string>(
+  obj: unknown,
+  key: K
+): obj is Record<K, number> {
+  return isPropertyAccessible(obj) && typeof obj[key] === "number";
+}
+
+function monthCodeToMonth(monthCode: string): number {
+  if (monthCode.startsWith("M")) {
+    return parseInt(monthCode.slice(1), 10);
+  }
+  throw new Error("Invalid month code: " + monthCode);
 }
